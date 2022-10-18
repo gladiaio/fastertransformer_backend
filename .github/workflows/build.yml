@@ -26,8 +26,6 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
         run: >-
-          ping -c 4 10.96.0.10 &&
-          curl docker.gladia.io &&
           docker build --pull
           ${{env.DOCKER_BUILD_OPT}}
           -t ${DOCKER_GLADIA_FQDN}/${{env.DOCKER_BUILD_IMAGE_NAME}}:${{env.DOCKER_BUILD_IMAGE_TAG}}
