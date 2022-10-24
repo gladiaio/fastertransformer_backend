@@ -10,13 +10,13 @@ concurrency:
 
 env:
   DOCKER_BUILD_OPT: ""
-  DOCKER_BUILD_IMAGE_NAME: fastertransformer-triton-backend
+  DOCKER_BUILD_IMAGE_NAME: gladia/fastertransformer-triton-backend
   DOCKER_BUILD_IMAGE_TAG: pr-${{ github.event.pull_request.number }}
 
 jobs:
 
   build:
-    runs-on: [self-hosted, fastertransformer-triton-backend, deploy]
+    runs-on: [self-hosted, k0s, build]
     steps:
       - name: Checkout
         id: checkout

@@ -18,27 +18,26 @@ concurrency:
 
 env:
   CONTAINER_IMAGE_TAG: ""
-  IMAGE: fastertransformer-triton-backend
+  IMAGE: gladia/fastertransformer-triton-backend
   TAG: ${{ inputs.tag }}
 
 
 jobs:
   deploy:
     name: Deploy to K0s
-    runs-on: [self-hosted, fastertransformer-triton-backend, deploy]
+    runs-on: [self-hosted, fastertransformer_backend, deploy]
     steps:
-      - name: Assert Image, TAG and NS
+      - name: Assert Image and tag
         run: |
           if [ "$TAG" == "" ]; then
             echo "CONTAINER_IMAGE_TAG=pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
           else
             echo "CONTAINER_IMAGE_TAG=$TAG" >> $GITHUB_ENV
           fi
-          echo "KUBE_NAMESPACE=$KNS" >> $GITHUB_ENV
           echo "CONTAINER_IMAGE_NAME=$DOCKER_GLADIA_FQDN/$IMAGE" >> $GITHUB_ENV
-      - name: deploy to cluster
-        uses: steebchen/kubectl@v2.0.0
-        with:
-          version: v1.24.4
-          config: ${{ secrets.KUBE_CONFIG_DATA }}
-          command: set image --record deployment/fastertransformer-triton-backend-deployment fastertransformer-triton-backend=${{ env.CONTAINER_IMAGE_NAME }}:${{ env.CONTAINER_IMAGE_TAG }} -n ${{ env.KUBE_NAMESPACE }}
+
+      - name: Deploy triton-ft
+        run: |
+          curl -L -o /tmp/kubectl https://storage.googleapis.com/kubernetes-release/release/${KVERSION}/bin/linux/amd64/kubectl
+          chmod +x /tmp/kubectl
+          /tmp/kubectl set image deployment/$KDEP $KCTNR=${{ env.CONTAINER_IMAGE_NAME }}:${{ env.CONTAINER_IMAGE_TAG }} --record -n $KNS
