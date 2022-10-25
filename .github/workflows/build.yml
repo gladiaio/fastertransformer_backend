@@ -37,12 +37,11 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build & Push
-        working-directory: ./docker
         env:
           DOCKER_BUILDKIT: 1
         run: >-
           docker build --pull
           ${{env.DOCKER_BUILD_OPT}}
           -t ${DOCKER_GLADIA_FQDN}/${{env.DOCKER_BUILD_IMAGE_NAME}}:${{env.DOCKER_BUILD_IMAGE_TAG}}
-          . &&
+          -f docker/Dockerfile . &&
           docker push ${DOCKER_GLADIA_FQDN}/${{env.DOCKER_BUILD_IMAGE_NAME}}:${{env.DOCKER_BUILD_IMAGE_TAG}}
