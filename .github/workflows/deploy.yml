@@ -1,0 +1,43 @@
+name: Deploy
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Image Tag to deploy'
+        required: true
+
+concurrency:
+  group: '${{ github.workflow }}'
+  cancel-in-progress: false
+
+env:
+  CONTAINER_IMAGE_TAG: ""
+  IMAGE: gladia/fastertransformer-triton-backend
+  TAG: ${{ inputs.tag }}
+
+
+jobs:
+  deploy:
+    name: Deploy to K0s
+    runs-on: [self-hosted, fastertransformer_backend, deploy]
+    steps:
+      - name: Assert Image and tag
+        run: |
+          if [ "$TAG" == "" ]; then
+            echo "CONTAINER_IMAGE_TAG=pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          else
+            echo "CONTAINER_IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          fi
+          echo "CONTAINER_IMAGE_NAME=$DOCKER_GLADIA_FQDN/$IMAGE" >> $GITHUB_ENV
+
+      - name: Deploy triton-ft
+        run: |
+          curl -L -o /tmp/kubectl https://storage.googleapis.com/kubernetes-release/release/${KVERSION}/bin/linux/amd64/kubectl
+          chmod +x /tmp/kubectl
+          /tmp/kubectl set image deployment/$KDEP $KCTNR=${{ env.CONTAINER_IMAGE_NAME }}:${{ env.CONTAINER_IMAGE_TAG }} --record -n $KNS
