@@ -39,7 +39,7 @@ jobs:
       - name: Build & Push
         working-directory: ./docker
         env:
-          DOCKER_BUILDKIT:1
+          DOCKER_BUILDKIT: 1
         run: >-
           docker build --pull
           ${{env.DOCKER_BUILD_OPT}}
